@@ -1,0 +1,146 @@
+<!-- 
+  Copyright © [2023] [Dustin_Chen]. All rights reserved.
+  Author: Dustin_Chen
+  Email:  Dustin_Chen@compal.com or chuhpsdustin@gmail.com
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>QXDM [0xB821]Paging ng-5G-S-TMSI Converter </title>
+    <style>
+        body {
+            line-height: 1.2;
+            font-size: 16px;
+            font-family: Roboto, sans-serif;
+        }
+
+        #binaryInput {
+            width: 400px;
+        }
+
+        #QXDM_result,
+        #resultSetID_QXDM,
+        #resultPointer_QXDM,
+        #resultTMSI_Part_0,
+        #resultTMSI_Part_1,
+        #resultTMSI_Part_2,
+        #resultTMSI_Part_3,
+        #wireshark_result,
+        #resultSetID_wireshark,
+        #resultPointer_wireshark,
+        #resultTMSI_wireshark {
+            line-height: 0;
+        }
+    </style>
+    <script>
+        function convertBinaryToDecimal() {
+            // 獲取輸入的48個位元的二進制數字並刪除所有空格
+            var binaryInput = document.getElementById("binaryInput").value.replace(/ /g, "");
+
+            // 確保二進制數字的長度為48
+            if (binaryInput.length !== 48) {
+                alert("請輸入48位元的二進制數字。");
+                return;
+            }
+
+            // 將二進制數字拆分為3組
+            var binarySetID = binaryInput.substr(0, 10);
+            var binaryPointer = binaryInput.substr(10, 6);
+            var binaryTMSI = binaryInput.substr(16, 32);
+
+            // 轉換每個部分為十進制並顯示調試信息
+            var decimalSetID = parseInt(binarySetID, 2);
+            var decimalPointer = parseInt(binaryPointer, 2);
+            var decimalTMSI = parseInt(binaryTMSI, 2);
+
+            // 更新調試信息
+            document.getElementById("debugInfo").innerHTML =
+                "【Debug Info】:<br>" +
+                " AMF Set ID (10 bits): " + binarySetID + " (Decimal: " + decimalSetID + ")<br>" +
+                " AMF Pointer (6 bits): " + binaryPointer + " (Decimal: " + decimalPointer + ")<br>" +
+                " 5G-TMSI (32 bits): " + binaryTMSI + " (Decimal: " + decimalTMSI + ")<br>";
+
+            // 更新顯示結果
+            document.getElementById("QXDM_result").textContent = "【QXDM result】 [0xB80A]	Registration accept";
+            document.getElementById("resultSetID_QXDM").textContent = "AMF_SET_ID = " + decimalSetID;
+            document.getElementById("resultPointer_QXDM").textContent = "AMF_Pointer = " + decimalPointer;
+            // 將32位的binaryTMSI拆分為4個8位一組
+            var tmsiParts = [];
+            for (var i = 0; i < 4; i++) {
+                var startIndex = i * 8;
+                var endIndex = startIndex + 8;
+                var tmsiPart = binaryTMSI.substr(startIndex, 8);
+                var decimalTMSIPart = parseInt(tmsiPart, 2);
+                tmsiParts.push(decimalTMSIPart);
+            }
+            // 更新5G-TMSI的四個部分
+            for (var j = 0; j < 4; j++) {
+                document.getElementById("resultTMSI_Part_" + j).textContent = "_5g_tmsi[" + j + "] = " + tmsiParts[j] +
+                    " (0x" + tmsiParts[j].toString(16) + ")";
+            }
+
+            document.getElementById("wireshark_result").textContent = "【wireshark result】InitialContextSetupRequest, Registration accept";
+            document.getElementById("resultSetID_wireshark").textContent = "AMF Set ID: " + decimalSetID;
+            document.getElementById("resultPointer_wireshark").textContent = "AMF Pointer: " + decimalPointer;
+            document.getElementById("resultTMSI_wireshark").textContent = "5G-TMSI: " + decimalTMSI;
+        }
+
+        // 在頁面載入時預先載入範例值
+        window.onload = function () {
+            document.getElementById("binaryInput").value = "00000001 00000001 00000111 10111010 00111101 00001011";
+        }
+    </script>
+</head>
+
+<body>
+    <h1>QXDM [0xB821]Paging ng-5G-S-TMSI Converter</h1>
+    <p style="margin: 0;">Author: Dustin_Chen, email: <a href="mailto:Dustin_Chen@compal.com" style="line-height: 1;">Dustin_Chen@compal.com</a> or <a href="mailto:chuhpsdustin@gmail.com" style="line-height: 1;">chuhpsdustin@gmail.com</a></p>
+	
+    <ul>
+        <li>
+            <strong>From Spec</strong>
+            <ul>
+                <li>
+                    (ng-5G-S-TMSI)=(AMF Set ID)+(AMF Pointer)+(5G-TMSI)<br>
+                    (48 bits)=(10 bits)+(6 bits)+(32 bits)<br>
+					
+					<img src="https://raw.githubusercontent.com/dustinchen26/paging/master/picture.png" alt="GitHub Image" width="800">
+
+                </li>
+            </ul>
+        </li><br>
+        <li>
+            <strong>Please enter the 48 bits number from QXDM [0xB821] PCCH / Paging</strong>
+            <ul>
+                <li> ue-Identity ng-5G-S-TMSI :<br>
+                    <input type="text" id="binaryInput"
+                        placeholder="例如：00000001 00000001 00000111 10111010 00111101 00001011">
+                    <button onclick="convertBinaryToDecimal()">Convert</button>
+                    <p id="debugInfo"></p>
+                    <br>
+					
+                    <p id="QXDM_result"></p>
+                    <p id="resultSetID_QXDM"></p>
+                    <p id="resultPointer_QXDM"></p>
+                    <!-- 顯示5G-TMSI的四個部分 -->
+                    <p id="resultTMSI_Part_0"></p>
+                    <p id="resultTMSI_Part_1"></p>
+                    <p id="resultTMSI_Part_2"></p>
+                    <p id="resultTMSI_Part_3"></p>
+					<br>
+					
+                    <p id="wireshark_result"></p>
+                    <p id="resultSetID_wireshark"></p>
+                    <p id="resultPointer_wireshark"></p>
+                    <p id="resultTMSI_wireshark"></p>
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <p></p>
+
+</body>
+
+</html>
