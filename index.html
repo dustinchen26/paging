@@ -11,13 +11,13 @@
     <title>QXDM [0xB821]Paging ng-5G-S-TMSI Converter </title>
     <style>
         body {
-            line-height: 1.2;
+            line-height: 1;
             font-size: 16px;
             font-family: Roboto, sans-serif;
         }
 
         #binaryInput {
-            width: 400px;
+            width: 450px;
         }
 
         #QXDM_result,
@@ -27,12 +27,23 @@
         #resultTMSI_Part_1,
         #resultTMSI_Part_2,
         #resultTMSI_Part_3,
+        #space,		
         #wireshark_result,
         #resultSetID_wireshark,
         #resultPointer_wireshark,
         #resultTMSI_wireshark {
             line-height: 0;
         }
+
+        #amfSetIdInput, #amfPointerInput, #tmsi0Input, #tmsi1Input, #tmsi2Input, #tmsi3Input {
+            width: 80px;
+        }
+		
+        #binaryOutput {
+            width: 600px;
+			line-height: 0;
+			font-family: Roboto, sans-serif;
+        }		
     </style>
     <script>
         function convertBinaryToDecimal() {
@@ -54,18 +65,21 @@
             var decimalSetID = parseInt(binarySetID, 2);
             var decimalPointer = parseInt(binaryPointer, 2);
             var decimalTMSI = parseInt(binaryTMSI, 2);
-
+			
+/*
             // 更新調試信息
-            document.getElementById("debugInfo").innerHTML =
+           document.getElementById("debugInfo").innerHTML =
                 "【Debug Info】:<br>" +
                 " AMF Set ID (10 bits): " + binarySetID + " (Decimal: " + decimalSetID + ")<br>" +
                 " AMF Pointer (6 bits): " + binaryPointer + " (Decimal: " + decimalPointer + ")<br>" +
                 " 5G-TMSI (32 bits): " + binaryTMSI + " (Decimal: " + decimalTMSI + ")<br>";
+*/
 
             // 更新顯示結果
             document.getElementById("QXDM_result").textContent = "【QXDM result】 [0xB80A]	Registration accept";
             document.getElementById("resultSetID_QXDM").textContent = "AMF_SET_ID = " + decimalSetID;
             document.getElementById("resultPointer_QXDM").textContent = "AMF_Pointer = " + decimalPointer;
+
             // 將32位的binaryTMSI拆分為4個8位一組
             var tmsiParts = [];
             for (var i = 0; i < 4; i++) {
@@ -75,11 +89,15 @@
                 var decimalTMSIPart = parseInt(tmsiPart, 2);
                 tmsiParts.push(decimalTMSIPart);
             }
+			
             // 更新5G-TMSI的四個部分
             for (var j = 0; j < 4; j++) {
                 document.getElementById("resultTMSI_Part_" + j).textContent = "_5g_tmsi[" + j + "] = " + tmsiParts[j] +
                     " (0x" + tmsiParts[j].toString(16) + ")";
             }
+			
+			// 加一個空行
+			document.getElementById("space").innerHTML = "<br>";
 
             document.getElementById("wireshark_result").textContent = "【wireshark result】InitialContextSetupRequest, Registration accept";
             document.getElementById("resultSetID_wireshark").textContent = "AMF Set ID: " + decimalSetID;
@@ -90,7 +108,46 @@
         // 在頁面載入時預先載入範例值
         window.onload = function () {
             document.getElementById("binaryInput").value = "00000001 00000001 00000111 10111010 00111101 00001011";
+            document.getElementById("amfSetIdInput").value = "4";
+            document.getElementById("amfPointerInput").value = "1";
+            document.getElementById("tmsi0Input").value = "7";
+            document.getElementById("tmsi1Input").value = "186";
+            document.getElementById("tmsi2Input").value = "61";
+            document.getElementById("tmsi3Input").value = "11";	
         }
+		
+        function convertToBinary() {
+            // 获取输入的十进制参数的值
+            var amfSetId = parseInt(document.getElementById("amfSetIdInput").value);
+            var amfPointer = parseInt(document.getElementById("amfPointerInput").value);
+            var tmsi0 = parseInt(document.getElementById("tmsi0Input").value);
+            var tmsi1 = parseInt(document.getElementById("tmsi1Input").value);
+            var tmsi2 = parseInt(document.getElementById("tmsi2Input").value);
+            var tmsi3 = parseInt(document.getElementById("tmsi3Input").value);
+
+            // 将参数转换为二进制并填充位数
+            var binaryAmfSetId = amfSetId.toString(2).padStart(10, '0');
+            var binaryAmfPointer = amfPointer.toString(2).padStart(6, '0');
+            var binaryTmsi0 = tmsi0.toString(2).padStart(8, '0');
+            var binaryTmsi1 = tmsi1.toString(2).padStart(8, '0');
+            var binaryTmsi2 = tmsi2.toString(2).padStart(8, '0');
+            var binaryTmsi3 = tmsi3.toString(2).padStart(8, '0');
+
+            // 组合所有二进制值以获取5G-S-TMSI
+            var binary5GSTMSI = binaryAmfSetId + binaryAmfPointer + binaryTmsi0 + binaryTmsi1 + binaryTmsi2 + binaryTmsi3;
+
+            // 将二进制5G-S-TMSI添加空格每8个bit
+            var formattedBinary5GSTMSI = "";
+            for (var i = 0; i < binary5GSTMSI.length; i++) {
+                formattedBinary5GSTMSI += binary5GSTMSI[i];
+                if ((i + 1) % 8 === 0 && i !== binary5GSTMSI.length - 1) {
+                    formattedBinary5GSTMSI += " ";
+                }
+            }
+
+            // 更新显示结果
+            document.getElementById("binaryOutput").textContent = "【Paging】ue-Identity ng-5G-S-TMSI = " + formattedBinary5GSTMSI;
+        }		
     </script>
 </head>
 
@@ -112,14 +169,13 @@
             </ul>
         </li><br>
         <li>
-            <strong>Please enter the 48 bits number from QXDM [0xB821] PCCH / Paging</strong>
+            <strong>【Tool_1】Enter the 48 bits from QXDM [0xB821] PCCH / Paging. It will calculate the (AMF_SET_ID)(AMF_Pointer)(_5g_tmsi[0])(_5g_tmsi[1])(_5g_tmsi[2])(_5g_tmsi[3])</strong>
             <ul>
                 <li> ue-Identity ng-5G-S-TMSI :<br>
                     <input type="text" id="binaryInput"
-                        placeholder="例如：00000001 00000001 00000111 10111010 00111101 00001011">
+                        placeholder="example：00000001 00000001 00000111 10111010 00111101 00001011">
                     <button onclick="convertBinaryToDecimal()">Convert</button>
                     <p id="debugInfo"></p>
-                    <br>
 					
                     <p id="QXDM_result"></p>
                     <p id="resultSetID_QXDM"></p>
@@ -129,7 +185,7 @@
                     <p id="resultTMSI_Part_1"></p>
                     <p id="resultTMSI_Part_2"></p>
                     <p id="resultTMSI_Part_3"></p>
-					<br>
+                    <p id="space"></p>					
 					
                     <p id="wireshark_result"></p>
                     <p id="resultSetID_wireshark"></p>
@@ -138,6 +194,35 @@
                 </li>
             </ul>
         </li>
+        <li>
+            <strong>【Tool_2】Enter [0xB80A] Registration accept (AMF_SET_ID)(AMF_Pointer)(_5g_tmsi[0])(_5g_tmsi[1])(_5g_tmsi[2])(_5g_tmsi[3]), it will calculate the 48 bits [0xB821] PCCH / Paging "ue-Identity ng-5G-S-TMSI"</strong>
+            <ul>
+                <li> Enter the following decimal parameters:
+					<ul>
+						<li> 
+							AMF_SET_ID: <input type="text" id="amfSetIdInput" placeholder="example: 4"><br>
+						</li>
+						<li> 
+							AMF_Pointer: <input type="text" id="amfPointerInput" placeholder="example: 1"><br>
+						</li>
+						<li> 
+							_5g_tmsi[0]: <input type="text" id="tmsi0Input" placeholder="example: 7"><br>
+						</li>
+						<li> 
+							_5g_tmsi[1]: <input type="text" id="tmsi1Input" placeholder="example: 186"><br>
+						</li>
+						<li> 
+							_5g_tmsi[2]: <input type="text" id="tmsi2Input" placeholder="example: 61"><br>
+						</li>
+						<li> 
+							_5g_tmsi[3]: <input type="text" id="tmsi3Input" placeholder="example: 11"><br>
+						</li>
+						<button onclick="convertToBinary()">Calculate</button>
+						<pre id="binaryOutput"></pre>
+					</ul>
+                </li>
+            </ul>
+        </li>		
     </ul>
     <p></p>
 
