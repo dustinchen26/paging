@@ -11,13 +11,13 @@
     <title>QXDM [0xB821]Paging ng-5G-S-TMSI Converter </title>
     <style>
         body {
-            line-height: 1;
-            font-size: 16px;
+            line-height: 1.2;
+            font-size: 14px;
             font-family: Roboto, sans-serif;
         }
 
         #binaryInput {
-            width: 450px;
+            width: 400px;
         }
 
         #QXDM_result,
@@ -36,13 +36,17 @@
         }
 
         #amfSetIdInput, #amfPointerInput, #tmsi0Input, #tmsi1Input, #tmsi2Input, #tmsi3Input {
-            width: 80px;
+            width: 40px;
         }
 		
         #binaryOutput {
             width: 600px;
 			line-height: 0;
 			font-family: Roboto, sans-serif;
+        }
+
+        .blue-text {
+            color: blue;
         }		
     </style>
     <script>
@@ -152,7 +156,7 @@
 </head>
 
 <body>
-    <h1>QXDM [0xB821]Paging ng-5G-S-TMSI Converter</h1>
+    <h2>QXDM [0xB821]Paging ng-5G-S-TMSI Converter</h2>
     <p style="margin: 0;">Author: Dustin_Chen, email: <a href="mailto:Dustin_Chen@compal.com" style="line-height: 1;">Dustin_Chen@compal.com</a> or <a href="mailto:chuhpsdustin@gmail.com" style="line-height: 1;">chuhpsdustin@gmail.com</a></p>
 	
     <ul>
@@ -163,13 +167,13 @@
                     (ng-5G-S-TMSI)=(AMF Set ID)+(AMF Pointer)+(5G-TMSI)<br>
                     (48 bits)=(10 bits)+(6 bits)+(32 bits)<br>
 					
-					<img src="https://raw.githubusercontent.com/dustinchen26/paging/master/picture.png" alt="GitHub Image" width="800">
+					<img src="https://raw.githubusercontent.com/dustinchen26/paging/master/picture.png" alt="GitHub Image" width="650">
 
                 </li>
             </ul>
         </li><br>
         <li>
-            <strong>【Tool_1】Enter the 48 bits from QXDM [0xB821] PCCH / Paging. It will calculate the (AMF_SET_ID)(AMF_Pointer)(_5g_tmsi[0])(_5g_tmsi[1])(_5g_tmsi[2])(_5g_tmsi[3])</strong>
+            <strong>【Tool_1】Enter 48 bits from QXDM <span class="blue-text">[0xB821] PCCH / Paging</span>. It will calculate the (AMF_SET_ID)(AMF_Pointer)(_5g_tmsi[0])(_5g_tmsi[1])(_5g_tmsi[2])(_5g_tmsi[3])</strong>
             <ul>
                 <li> ue-Identity ng-5G-S-TMSI :<br>
                     <input type="text" id="binaryInput"
@@ -195,7 +199,7 @@
             </ul>
         </li>
         <li>
-            <strong>【Tool_2】Enter [0xB80A] Registration accept (AMF_SET_ID)(AMF_Pointer)(_5g_tmsi[0])(_5g_tmsi[1])(_5g_tmsi[2])(_5g_tmsi[3]), it will calculate the 48 bits [0xB821] PCCH / Paging "ue-Identity ng-5G-S-TMSI"</strong>
+            <strong>【Tool_2】Enter QXDM <span class="blue-text">[0xB80A] Registration accept</span> (AMF_SET_ID)(AMF_Pointer)(_5g_tmsi[0])(_5g_tmsi[1])(_5g_tmsi[2])(_5g_tmsi[3]), it will calculate the 48 bits [0xB821] PCCH / Paging "ue-Identity ng-5G-S-TMSI"</strong>
             <ul>
                 <li> Enter the following decimal parameters:
 					<ul>
